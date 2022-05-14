@@ -25,35 +25,58 @@ FirebaseData fbdo;
 FirebaseAuth auth;
 FirebaseConfig config;
 unsigned long sendDataPrevMillis = 0;
-int count = 0;
 bool signupOK = false;
 
 
 //Function declaration
 void initWiFi();
-
-
+void initLCD();
+void initFireBase();
+void sendDataToFirebase(String path, String data);
 
 LiquidCrystal_I2C lcd(0x27,16,2);  // set the LCD address to 0x27 for a 16 chars and 2 line display
 
 void setup() {
   Serial.begin(916200);
-  //WiFi initialization
+  //initialization
   initWiFi();
-  //LCD initialization
+  initLCD();
+  initFireBase();  
+}
+
+void loop() {
+  sendDataToFirebase("testdata/SSID", WiFi.SSID());
+}
+
+
+//For initializing wifi connection
+void initWiFi() {
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(ssid, password);
+  Serial.print("Connecting to WiFi ..");
+  while (WiFi.status() != WL_CONNECTED) {
+    Serial.print('.');
+    delay(1000);
+  }  
+}
+
+//For initializing LCD
+void initLCD(){
+ //LCD initialization
   lcd.init();
   lcd.clear();         
   lcd.backlight();// Make sure backlight is on
-
-
-  lcd.setCursor(0,0);   //Set cursor to character 0 on line 0
-  lcd.print("Connected with:");
+    // lcd.setCursor(0,0);   //Set cursor to character 0 on line 0
+  // lcd.print("Connected with:");
   
-  lcd.setCursor(0,1);   //Move cursor to character 0 on line 1
-  lcd.print(WiFi.SSID());
+  // lcd.setCursor(0,1);   //Move cursor to character 0 on line 1
+  // lcd.print(WiFi.SSID());
+}
 
-  
-  /* Assign the api key (required) */
+
+//For initializing Firebase
+void initFireBase(){
+ /* Assign the api key (required) */
   config.api_key = API_KEY;
 
   /* Assign the RTDB URL (required) */
@@ -77,44 +100,14 @@ void setup() {
   Firebase.reconnectWiFi(true);
 }
 
-void loop() {
-  if (Firebase.ready() && signupOK && (millis() - sendDataPrevMillis > 500 || sendDataPrevMillis == 0)){
+void sendDataToFirebase(String path, String data){
+if (Firebase.ready() && signupOK && (millis() - sendDataPrevMillis > 500 || sendDataPrevMillis == 0)){
     sendDataPrevMillis = millis();
-    // Write an Int number on the database path test/int
-    if (Firebase.RTDB.setString(&fbdo, "testdata/SSID", WiFi.SSID())){
+    if (Firebase.RTDB.setString(&fbdo, path,data)){
       Serial.println("PASSED");
-      Serial.println("PATH: " + fbdo.dataPath());
-      Serial.println("TYPE: " + fbdo.dataType());
-      lcd.setCursor(0, 1);
-      lcd.print("Data sent to firebase");
     }
     else {
       Serial.println("FAILED");
       Serial.println("REASON: " + fbdo.errorReason());
-    }
-    count++;
-    
-    // Write an Float number on the database path test/float
-    if (Firebase.RTDB.setFloat(&fbdo, "testdata/float", 0.01 + random(0,100))){
-      Serial.println("PASSED");
-      Serial.println("PATH: " + fbdo.dataPath());
-      Serial.println("TYPE: " + fbdo.dataType());
-    }
-    else {
-      Serial.println("FAILED");
-      Serial.println("REASON: " + fbdo.errorReason());
-    }
-  }
-}
-
-
-//For initializing wifi connection
-void initWiFi() {
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, password);
-  Serial.print("Connecting to WiFi ..");
-  while (WiFi.status() != WL_CONNECTED) {
-    Serial.print('.');
-    delay(1000);
-  }  
-}
+    }  
+}}
