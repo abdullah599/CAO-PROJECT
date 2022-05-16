@@ -16,6 +16,13 @@
 
 //Declaration
 
+int led = 4; // LED/LOCK
+int buzzer = 2; //Buzzer
+
+// set the LCD address to 0x27 for a 16 chars and 2 line display
+LiquidCrystal_I2C lcd(0x27,16,2);  // set the LCD address to 0x27 for a 16 chars and 2 line display
+
+
 //for wifi
 #define ssid  "Predator"
 #define password "multan123"
@@ -30,7 +37,6 @@ unsigned long interval = 30000;
 FirebaseData fbdo;
 FirebaseAuth auth;
 FirebaseConfig config;
-unsigned long sendDataPrevMillis = 0;
 bool signupOK = false;
 
 
@@ -42,21 +48,12 @@ MFRC522::MIFARE_Key key;
 bool shouldCheck = false;
 String content = "";
 
-// set the LCD address to 0x27 for a 16 chars and 2 line display
 
-
-
-
-/* Set the block to which we want to write data */
+/* Set the block to which we want to read data from*/
 /* Be aware of Sector Trailer Blocks */
 int blockNumForDob = 1;
 int blockNumForName = 2;
 int blockNumForDesignation = 4;
-/* Create an array of 16 Bytes and fill it with data */
-/* This is the actual data which is going to be written into the card */
-byte blockDataName[16] = { "Ibrahim" };
-byte blockDataDob[16] = { "8 Feb 2003" };
-byte blockDataDesignation[16] = { "Worker" };
 
 
 /* Create another array to read data from Block */
@@ -80,33 +77,23 @@ void reconnectWIFI();
 void initLCD();
 void initFireBase();
 void sendDataToFirebase(String path, String data);
-void readRFID();
 void ReadDataFromBlock(int blockNumForName, byte readBlockData_Name[]);
 void checkFunction(String content);
+void LCD(String m1, String m2);
 // Function that gets current epoch time
-unsigned long getTime() {
-  time_t now;
-  struct tm timeinfo;
-  if (!getLocalTime(&timeinfo)) {
-    //Serial.println("Failed to obtain time");
-    return(0);
-  }
-  time(&now);
-  return now;
-}
-
-LiquidCrystal_I2C lcd(0x27,16,2);  // set the LCD address to 0x27 for a 16 chars and 2 line display
-
-
-
-
-
+unsigned long getTime();
 
 void setup()
 {
     Serial.begin(916200);
+    pinMode(led, OUTPUT);
+    pinMode(buzzer, OUTPUT);
+    
+
     rtc.setTime(30, 58, 2, 16, 5, 2022);  // 17th Jan 2021 15:24:30
     //initialization
+    
+    // LCD("Please wait", "Initializing");
     initWiFi();
     initLCD();
     initFireBase();
@@ -117,6 +104,8 @@ void setup()
     mfrc522.PCD_Init();
     delay(50);
     mfrc522.PCD_DumpVersionToSerial();
+   
+    // LCD("Sys Ready","Scan the card");
 
 }
 
@@ -145,6 +134,7 @@ void loop()
     }
     Serial.print("\n");
     Serial.println("**Card Detected**");
+
     /* Print UID of the Card */
     Serial.print(F("Card UID:"));
     for (byte i = 0; i < mfrc522.uid.size; i++)
@@ -276,48 +266,6 @@ void sendDataToFirebase(String path, String Uid, String Name, String Dob, String
     }
 }
 
-void readRFID()
-{
-    if (!mfrc522.PICC_IsNewCardPresent())
-    {
-        return;
-    }
-    // if the card was read
-    if (!mfrc522.PICC_ReadCardSerial())
-    {
-        return;
-    }
-    //Read the UID of the card and write to the serial port
-    Serial.println();
-    Serial.print("UID Tag :");
-    String content = "";
-    byte letter;
-    for (byte i = 0; i < mfrc522.uid.size; i++)
-    {
-        Serial.print(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " ");
-        Serial.print(mfrc522.uid.uidByte[i], HEX);
-        content.concat(String(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " "));
-        content.concat(String(mfrc522.uid.uidByte[i], HEX));
-    }
-    content.toUpperCase();
-    Serial.println();
-    mfrc522.PICC_DumpToSerial(&(mfrc522.uid));
-    if (content.substring(1) == "30 31 B8 35")
-    {
-        Serial.println("Access Granted");
-        sendDataToFirebase("test/AG/Uid", content.substring(1));
-    }
-    else
-    {
-        Serial.println("Access Denied");
-        sendDataToFirebase("test/AD/Uid", content.substring(1));
-    }
-
-
-
-}
-
-
 void ReadDataFromBlock(int blockNumForName, byte readBlockData_Name[])
 {
     /* Authenticating the desired data block for Read access using Key A */
@@ -346,8 +294,6 @@ void ReadDataFromBlock(int blockNumForName, byte readBlockData_Name[])
     }
     content.toUpperCase();
     Serial.println();
-    
-
     /* Reading data from the Block */
     status = mfrc522.MIFARE_Read(blockNumForName, readBlockData_Name, &bufferLen);
     if (status != MFRC522::STATUS_OK)
@@ -361,11 +307,6 @@ void ReadDataFromBlock(int blockNumForName, byte readBlockData_Name[])
         Serial.println("Block was read successfully");
         shouldCheck = true;
     }
-    
-                            // Prevents accidental duplicate reads
- 
-
-
 }
 
 void checkFunction(String content)
@@ -389,12 +330,8 @@ void checkFunction(String content)
     
     // char milis[20];
     String milis;
-
-  
     milis = rtc.getEpoch();
   
-
-
     if (content.substring(1) == "30 31 B8 35"||content.substring(1)=="30 9D 6F 35"||content.substring(1)=="CC CC 06 49")
     {
 
@@ -414,4 +351,23 @@ void checkFunction(String content)
         sendDataToFirebase(path, content.substring(1), name, dob, desgnation,rtc.getDateTime(true));
     }
     shouldCheck = false;
+}
+// void LCD(String m1 , String m2 ) {
+//     lcd.clear();
+//     lcd.setCursor(0, 0);
+//     lcd.print(m1);
+//     lcd.setCursor(0, 1);
+//     lcd.print(m2);
+
+// }
+unsigned long getTime(){
+    
+  time_t now;
+  struct tm timeinfo;
+  if (!getLocalTime(&timeinfo)) {
+    //Serial.println("Failed to obtain time");
+    return(0);
+  }
+  time(&now);
+  return now;
 }
