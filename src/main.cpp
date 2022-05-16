@@ -15,9 +15,8 @@
 
 
 //Declaration
-
-int led = 4; // LED/LOCK
-int buzzer = 2; //Buzzer
+int led = 2; // LED/LOCK
+int buzzer = 4; //Buzzer
 
 // set the LCD address to 0x27 for a 16 chars and 2 line display
 LiquidCrystal_I2C lcd(0x27,16,2);  // set the LCD address to 0x27 for a 16 chars and 2 line display
@@ -90,12 +89,13 @@ void setup()
     pinMode(buzzer, OUTPUT);
     
 
-    rtc.setTime(30, 58, 2, 16, 5, 2022);  // 17th Jan 2021 15:24:30
+    rtc.setTime(30, 16, 21, 17, 5, 2022);  // 17th May 2022 15:24:30
     //initialization
     
-    // LCD("Please wait", "Initializing");
-    initWiFi();
     initLCD();
+    LCD("Please wait", "Initializing");
+    
+    initWiFi();
     initFireBase();
 
 
@@ -105,7 +105,7 @@ void setup()
     delay(50);
     mfrc522.PCD_DumpVersionToSerial();
    
-    // LCD("Sys Ready","Scan the card");
+    LCD("System Ready","Scan the card");
 
 }
 
@@ -113,8 +113,8 @@ void loop()
 {
 
     reconnectWIFI(); //if required
-                     // readRFID();
-                     //   /* Prepare the ksy for authentication */
+
+     //   /* Prepare the ksy for authentication */
     /* All keys are set to FFFFFFFFFFFFh at chip delivery from the factory */
     for (byte i = 0; i < 6; i++)
     {
@@ -134,6 +134,7 @@ void loop()
     }
     Serial.print("\n");
     Serial.println("**Card Detected**");
+    LCD("Card Detected", "");
 
     /* Print UID of the Card */
     Serial.print(F("Card UID:"));
@@ -173,6 +174,7 @@ void loop()
     {
         checkFunction(content);
     }
+        LCD("System Ready","Scan the card");
 
 
 }
@@ -198,6 +200,7 @@ void reconnectWIFI()
     {
         Serial.print(millis());
         Serial.println("Reconnecting to WiFi...");
+        
         WiFi.disconnect();
         WiFi.reconnect();
         previousMillis = currentMillis;
@@ -211,11 +214,11 @@ void initLCD()
     lcd.init();
     lcd.clear();
     lcd.backlight();// Make sure backlight is on
-                    // lcd.setCursor(0,0);   //Set cursor to character 0 on line 0
-                    // lcd.print("Connected with:");
 
-    // lcd.setCursor(0,1);   //Move cursor to character 0 on line 1
-    // lcd.print(WiFi.SSID());
+    // lcd.setCursor(0,0);   //Set cursor to character 0 on line 0
+     // lcd.print("Connected with:");
+
+   
 }
 
 
@@ -336,30 +339,64 @@ void checkFunction(String content)
     {
 
         Serial.println("Access Granted");
-
+        LCD("Access Granted", " ");
+        delay(1000);
+        if (name != "") {
+              LCD("Welcome", name);
+        }
+        else {
+             LCD("Access Granted", " ");
+        }
+        digitalWrite(led, HIGH);
         String path = "test/AG/";
         path.concat(milis);
-
-        sendDataToFirebase(path, content.substring(1), name, dob, desgnation,rtc.getDateTime(true));
+        delay(3000);
+        digitalWrite(led, LOW);
+        LCD(" ", "Please wait...");
+        sendDataToFirebase(path, content.substring(1), name, dob, desgnation, rtc.getDateTime(true));
+        
     }
     else
     {
 
         Serial.println("Access Denied");
         String path = "test/AD/";
-        path.concat(milis);
-        sendDataToFirebase(path, content.substring(1), name, dob, desgnation,rtc.getDateTime(true));
-    }
-    shouldCheck = false;
-}
-// void LCD(String m1 , String m2 ) {
-//     lcd.clear();
-//     lcd.setCursor(0, 0);
-//     lcd.print(m1);
-//     lcd.setCursor(0, 1);
-//     lcd.print(m2);
+        LCD("Access Denied", " ");
+        delay(1000);
+        if (name != "") {
+              LCD(name,"not allowed");
+        }
+        else {
+             LCD("Access Denied", " ");
+        }
+        digitalWrite(buzzer, HIGH);
+        delay(500);
+        digitalWrite(buzzer, LOW);
+        delay(500);
+         digitalWrite(buzzer, HIGH);
+        delay(500);
+        digitalWrite(buzzer, LOW);
+        delay(500); digitalWrite(buzzer, HIGH);
+        delay(500);
+        digitalWrite(buzzer, LOW);
+        delay(500);
 
-// }
+        path.concat(milis);
+        LCD(" ", "Please wait...");
+        sendDataToFirebase(path, content.substring(1), name, dob, desgnation, rtc.getDateTime(true));
+    }
+  
+    shouldCheck = false;
+        LCD("System Ready","Scan the card");
+}
+void LCD(String m1 , String m2 ) {
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print(m1);
+    lcd.setCursor(0, 1);
+    lcd.print(m2);
+
+}
 unsigned long getTime(){
     
   time_t now;
