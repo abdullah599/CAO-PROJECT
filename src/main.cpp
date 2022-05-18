@@ -89,7 +89,7 @@ void setup()
     pinMode(buzzer, OUTPUT);
     
 
-    rtc.setTime(30, 16, 21, 17, 5, 2022);  // 17th May 2022 15:24:30
+    rtc.setTime(30, 01, 22, 18, 5, 2022);  // 17th May 2022 15:24:30
     //initialization
     
     initLCD();
@@ -257,7 +257,7 @@ void sendDataToFirebase(String path, String Uid, String Name, String Dob, String
     {
       
       
-      if (Firebase.RTDB.setString(&fbdo, path+"/Uid", Uid) && Firebase.RTDB.setString(&fbdo, path+"/Name", Name)&&Firebase.RTDB.setString(&fbdo, path+"/Date of Birth", Dob)&&Firebase.RTDB.setString(&fbdo, path+"/Designation", Designation)&&Firebase.RTDB.setString(&fbdo, path+"/Time", Time)&&Firebase.RTDB.setString(&fbdo, path+"/Status", status))
+      if (Firebase.RTDB.setString(&fbdo, path+"/Uid", Uid)&&Firebase.RTDB.setString(&fbdo, path+"/Time", Time) && Firebase.RTDB.setString(&fbdo, path+"/Name", Name)&&Firebase.RTDB.setString(&fbdo, path+"/Date of Birth", Dob)&&Firebase.RTDB.setString(&fbdo, path+"/Designation", Designation)&&Firebase.RTDB.setString(&fbdo, path+"/Status", status))
         {
             Serial.println("PASSED");
         }
@@ -333,7 +333,7 @@ void checkFunction(String content)
     
     // char milis[20];
     String milis;
-    milis = rtc.getEpoch();
+    milis = -rtc.getEpoch();
   
     if (content.substring(1) == "30 31 B8 35"||content.substring(1)=="30 9D 6F 35"||content.substring(1)=="CC CC 06 49")
     {

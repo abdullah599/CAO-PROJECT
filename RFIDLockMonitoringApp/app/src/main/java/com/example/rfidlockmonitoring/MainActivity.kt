@@ -38,7 +38,7 @@ class MainActivity : AppCompatActivity() {
 					Data.clear()
 					for (Snapshot in snapshot.children) {
 
-						if (Snapshot.child("Name").value.toString() != ""){
+						if (Snapshot.child("Name").value.toString() != "null"){
 							Data.add(Data(Snapshot.child("Name").value.toString(),
 							     Snapshot.child("Designation").value.toString(),
 							     Snapshot.child("Time").value.toString(),
@@ -49,7 +49,7 @@ class MainActivity : AppCompatActivity() {
 						else {
 
 							Data.add(Data(Snapshot.child("Uid").value.toString(),
-							              Snapshot.child("Designation").value.toString(),
+							              "Unknown",
 							              Snapshot.child("Time").value.toString(),
 							              Snapshot.child("Status").value.toString()))
 						}
