@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "482810355661",
+    "firebase_url": "https://cao-project-8bf71-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "cao-project-8bf71",
+    "storage_bucket": "cao-project-8bf71.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:482810355661:android:982b455a5380ac21472e84",
+        "android_client_info": {
+          "package_name": "com.example.rfidlockmonitoring"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "482810355661-ghfvojbk67c8tdh8ukctnm9o0vl8ve3p.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCEYckwKB6YhjXkQ4pn-6y_On0di614GEI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "482810355661-ghfvojbk67c8tdh8ukctnm9o0vl8ve3p.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
