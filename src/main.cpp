@@ -251,13 +251,13 @@ void initFireBase()
     Firebase.reconnectWiFi(true);
 }
 
-void sendDataToFirebase(String path, String Uid, String Name, String Dob, String Designation,String Time)
+void sendDataToFirebase(String path, String Uid, String Name, String Dob, String Designation,String Time,String status)
 {
     if (Firebase.ready() && signupOK )
     {
       
       
-      if (Firebase.RTDB.setString(&fbdo, path+"/Uid", Uid) && Firebase.RTDB.setString(&fbdo, path+"/Name", Name)&&Firebase.RTDB.setString(&fbdo, path+"/Date of Birth", Dob)&&Firebase.RTDB.setString(&fbdo, path+"/Designation", Designation)&&Firebase.RTDB.setString(&fbdo, path+"/Time", Time))
+      if (Firebase.RTDB.setString(&fbdo, path+"/Uid", Uid) && Firebase.RTDB.setString(&fbdo, path+"/Name", Name)&&Firebase.RTDB.setString(&fbdo, path+"/Date of Birth", Dob)&&Firebase.RTDB.setString(&fbdo, path+"/Designation", Designation)&&Firebase.RTDB.setString(&fbdo, path+"/Time", Time)&&Firebase.RTDB.setString(&fbdo, path+"/Status", status))
         {
             Serial.println("PASSED");
         }
@@ -348,19 +348,19 @@ void checkFunction(String content)
              LCD("Access Granted", " ");
         }
         digitalWrite(led, HIGH);
-        String path = "test/AG/";
+        String path = "data/";
         path.concat(milis);
         delay(3000);
         digitalWrite(led, LOW);
         LCD(" ", "Please wait...");
-        sendDataToFirebase(path, content.substring(1), name, dob, desgnation, rtc.getDateTime(true));
+        sendDataToFirebase(path, content.substring(1), name, dob, desgnation, rtc.getDateTime(true),"Access Granted");
         
     }
     else
     {
 
         Serial.println("Access Denied");
-        String path = "test/AD/";
+        String path = "data/";
         LCD("Access Denied", " ");
         delay(1000);
         if (name != "") {
@@ -383,7 +383,7 @@ void checkFunction(String content)
 
         path.concat(milis);
         LCD(" ", "Please wait...");
-        sendDataToFirebase(path, content.substring(1), name, dob, desgnation, rtc.getDateTime(true));
+        sendDataToFirebase(path, content.substring(1), name, dob, desgnation, rtc.getDateTime(true),"Access Denied");
     }
   
     shouldCheck = false;
