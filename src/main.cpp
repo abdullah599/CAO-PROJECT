@@ -353,7 +353,7 @@ void checkFunction(String content)
         delay(3000);
         digitalWrite(led, LOW);
         LCD(" ", "Please wait...");
-        sendDataToFirebase(path, content.substring(1), name, dob, desgnation, rtc.getDateTime(true),"Access Granted");
+        sendDataToFirebase(path, content.substring(1), name, dob, desgnation, rtc.getDateTime(),"Access Granted");
         
     }
     else
@@ -383,7 +383,7 @@ void checkFunction(String content)
 
         path.concat(milis);
         LCD(" ", "Please wait...");
-        sendDataToFirebase(path, content.substring(1), name, dob, desgnation, rtc.getDateTime(true),"Access Denied");
+        sendDataToFirebase(path, content.substring(1), name, dob, desgnation, rtc.getDateTime(),"Access Denied");
     }
   
     shouldCheck = false;
